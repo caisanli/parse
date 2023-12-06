@@ -1,0 +1,10 @@
+{
+  "name": "parse",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "repository": "https://github.com/caisanli/parse.git",
+  "author": "caigx <caisanli_0105@163.com>",
+  "license": "MIT",
+  "private": true
+}
