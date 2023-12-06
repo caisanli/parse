@@ -1,9 +1,9 @@
-import { getVal, parse } from './index.js';
+import { parseExpression } from './utils.js';
 
 export const funcObj = {
   COUNTIFS(args) {
-    const firstVal = parse(args[0]);
-    const twoVal = parse(args[1]);
+    const firstVal = parseExpression(args[0]);
+    const twoVal = parseExpression(args[1]);
     console.log('COUNTIFS args：', args)
     console.log('COUNTIFS val：', firstVal, twoVal)
     return undefined;
@@ -19,7 +19,7 @@ export const funcObj = {
   },
   TODAY(args) {
     console.log('TODAY args：', args)
-    return undefined;
+    return Date.now();
   },
   YEAR(args) {
     console.log('YEAR args：', args)
@@ -35,9 +35,9 @@ export const funcObj = {
   },
   IF(args) {
     console.log('IF args：', args)
-    const firstVal = parse(args[0]);
-    const twoVal = parse(args[1]);
-    const threeVal = parse(args[2]);
+    const firstVal = parseExpression(args[0]);
+    const twoVal = parseExpression(args[1]);
+    const threeVal = parseExpression(args[2]);
     return undefined;
   },
   ROUNDUP(args) {
@@ -113,6 +113,7 @@ export const funcObj = {
     return undefined;
   },
   EOMONTH(args) {
+    const val = parseExpression(args[0]);
     console.log('EOMONTH args：', args)
     return undefined;
   },

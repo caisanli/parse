@@ -1,5 +1,5 @@
 // 比较操作符
-import { operation } from './func.js';
+import { funcObj, operation } from './func.js';
 
 export const ComparisonOperators = ['==', '<=', '>=', '!=', '>', '<'];
 
@@ -63,7 +63,7 @@ export function getParamsByStr(str) {
     '#': '#',
     '[': ']',
     ']': '['
-  }
+  };
   const obj = {};
   let prevKey = '';
   for (let i = 0; i < str.length; i++) {
@@ -92,4 +92,66 @@ export function getParamsByStr(str) {
   })
   arr.push(str.slice(commaIndexArr[commaIndexArr.length - 1] + 1))
   return arr;
+}
+
+/**
+ * 获取括号里的信息
+ * @param str
+ */
+function getConclusionInfo(str) {
+  const keys = ['(', ')'];
+  const obj = {
+    '(': [],
+    ')': []
+  }
+  let index = -1;
+  for (let i = 0; i < str.length; i++) {
+    const s = str[i];
+    if (keys.includes(s)) {
+      obj[s].push(i);
+      if (obj['('].length === obj[')'].length) {
+        index = i;
+        break;
+      }
+    }
+  }
+
+  return index;
+}
+
+/**
+ * 获取表达式信息
+ * @param str
+ */
+export function getExpressionInfo(str) {
+  if (str.startsWith('(')) {
+    const index = getConclusionInfo(str);
+    // 获取'('')'里面的表达式
+    const expression = str.slice(1, index);
+    console.log('找到了：', str.slice(1, index));
+    // 继续提取
+    getExpressionInfo(expression);
+  } else {
+    const reg = new RegExp(`${ operation.join('|') }`, 'g');
+    const res = reg.exec(str);
+    if (res) {
+      const startIndex = res.index;
+      const d = str.substring(reg.lastIndex, str.length);
+      const endIndex = getConclusionInfo(d);
+      const newEndIndex = endIndex + reg.lastIndex + 1;
+      const params = getParamsByStr(str.substring(reg.lastIndex + 1, newEndIndex - 1));
+      const val = funcObj[res[0]](params);
+      console.log('执行函数的返回值：', val);
+      console.log('表达式：', newEndIndex, str.substring(startIndex, newEndIndex));
+      console.log('剩下的字符串', str.substring(newEndIndex))
+    } else {
+
+    }
+  }
+  return null;
+}
+
+export function parseExpression(str) {
+  getExpressionInfo(str);
+  return undefined;
 }
