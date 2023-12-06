@@ -87,10 +87,10 @@ export function getParamsByStr(str) {
   const arr = [];
   let prevIndex = 0
   commaIndexArr.forEach(i => {
-    arr.push(str.slice(prevIndex, i));
+    arr.push(str.slice(prevIndex, i).trim());
     prevIndex = i + 1;
   })
-  arr.push(str.slice(commaIndexArr[commaIndexArr.length - 1] + 1))
+  arr.push(str.slice(commaIndexArr[commaIndexArr.length - 1] + 1).trim())
   return arr;
 }
 
@@ -132,18 +132,22 @@ export function getExpressionInfo(str) {
     // 继续提取
     getExpressionInfo(expression);
   } else {
+    // 查找函数
     const reg = new RegExp(`${ operation.join('|') }`, 'g');
     const res = reg.exec(str);
     if (res) {
+      const funcName = res[0];
       const startIndex = res.index;
       const d = str.substring(reg.lastIndex, str.length);
       const endIndex = getConclusionInfo(d);
       const newEndIndex = endIndex + reg.lastIndex + 1;
       const params = getParamsByStr(str.substring(reg.lastIndex + 1, newEndIndex - 1));
-      const val = funcObj[res[0]](params);
+      // 执行函数
+      const val = funcObj[funcName](params);
+      const lastStr = str.substring(newEndIndex).trim();
       console.log('执行函数的返回值：', val);
       console.log('表达式：', newEndIndex, str.substring(startIndex, newEndIndex));
-      console.log('剩下的字符串', str.substring(newEndIndex))
+      console.log('剩下的字符串：', lastStr)
     } else {
 
     }
