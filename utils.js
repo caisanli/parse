@@ -1,4 +1,4 @@
-import { funcObj, operation } from './func.js';
+import { funcMap, operation } from './config.js';
 
 // 比较操作符
 export const ComparisonOperators = ['==', '<=', '>=', '!=', '>', '<'];
@@ -26,7 +26,7 @@ export function getOperatorReg(start = false) {
  * @returns {RegExp}
  */
 export function getFuncReg() {
-  return new RegExp(`(${ operation.join('|') })\\((.*)\\)`, 'g');
+  return new RegExp(`${ operation.join('|') }`, 'g')
 }
 
 /**
@@ -282,7 +282,7 @@ function getVarInfo(str) {
  * @param str
  */
 function getFuncInfo(str) {
-  const reg = new RegExp(`${ operation.join('|') }`, 'g');
+  const reg = getFuncReg();
   let execRes;
   const indexArr = [];
   const resArr = [];
@@ -301,7 +301,7 @@ function getFuncInfo(str) {
     prevLastIndex = newEndIndex;
     // reg.lastIndex = execRes.index;
     // 执行函数
-    const val = funcObj[funcName](params);
+    const val = funcMap[funcName](params);
     indexArr.push([startIndex, newEndIndex]);
     resArr.push({ val: val, type: 'str' });
   }
@@ -314,8 +314,7 @@ function getFuncInfo(str) {
  * @returns {*|*[]}
  */
 export function parseExpression(str = '') {
-  const arr = getExpressionInfo(str);
-  return arr;
+  return getExpressionInfo(str);
 }
 
 // console.log('getFuncInfo：', getFuncInfo('EOMONTH(TODAY(),-1)- DATE(YEAR(入职日期),MONTH(入职日期),DAY(入职日期)'));

@@ -1,5 +1,4 @@
-import { getParamsByStr, getFuncReg, getNotFuncInfo, getExpressionInfo } from './utils.js';
-import { funcObj } from './func.js';
+import { getExpressionInfo } from './utils.js';
 
 // const oStr = `COUNTIFS(TO_DATE(#row.完结日期_日#)<TO_DATE(#df.转正日期#), #df.判断#=='88VIP', #df.诉求单完成类型# == '诉求单新建完结量')`;
 // const oStr =  `SUMIFS(#["税收","工资"]#,#df.运营中心# == #row.运营中心#,#data.运营中心# == "重庆") `
