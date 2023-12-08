@@ -161,10 +161,9 @@ export function getNotFuncInfo(str) {
   const comReg = getCompareReg(true);
   const comRes = comReg.exec(str);
   if (comRes) {
-    arr.push({
-      type: 'com',
-      val: str.substring(comRes.index, comReg.lastIndex)
-    })
+    arr.push(
+      createItem(str.substring(comRes.index, comReg.lastIndex), 'com')
+    )
     const lastStr = str.substring(comReg.lastIndex, length).trim();
     arr.push(...getNotFuncInfo(lastStr))
     return arr;
@@ -174,10 +173,9 @@ export function getNotFuncInfo(str) {
   const opeReg = getOperatorReg(true);
   const opeRes = opeReg.exec(str);
   if (opeRes) {
-    arr.push({
-      type: 'ope',
-      val: str.substring(opeRes.index, opeReg.lastIndex)
-    })
+    arr.push(
+      createItem(str.substring(opeRes.index, opeReg.lastIndex), 'ope')
+    );
     const lastStr = str.substring(opeReg.lastIndex, length).trim();
     arr.push(...getNotFuncInfo(lastStr))
     return arr;
@@ -187,11 +185,11 @@ export function getNotFuncInfo(str) {
   if (str.startsWith('#')) {
     const { index } = getVarInfo(str);
     if (index === -1) {
-      arr.push({ type: 'var', val: str });
+      arr.push(createItem(str, 'var'));
     } else {
       const lastStr = str.substring(index, length);
       arr.push(
-        { type: 'var', val: str.substring(0, index) },
+        createItem(str.substring(0, index), 'var'),
         ...getNotFuncInfo(lastStr)
       )
     }
@@ -206,27 +204,21 @@ export function getNotFuncInfo(str) {
     indexArr.forEach((ii, i) => {
       let item;
       if (i === 0) {
-        item = {
-          val: str.substring(0, ii[0]),
-          type: 'str'
-        }
+        item = createItem(str.substring(0, ii[0]));
       } else {
-        item = {
-          val: str.substring(indexArr[i - 1][1], ii[0]),
-          type: 'str'
-        }
+        item = createItem(str.substring(indexArr[i - 1][1], ii[0]));
       }
       resArr.splice(i, 0, item);
     })
     // 说明还没处理完
     const last = indexArr[indexArr.length - 1];
     if (last[1] < str.length - 1) {
-      resArr.push({ type: 'str', val: str.substring(last[1]) });
+      resArr.push(createItem(str.substring(last[1])));
     }
     return resArr;
   }
 
-  return [{ type: 'str', val: str }];
+  return [createItem(str)];
 }
 
 /**
@@ -240,10 +232,7 @@ function getOpeInfo(str) {
   const indexArr = [];
   while ((execRes = reg.exec(str)) !== null) {
     const val = execRes[0];
-    resArr.push({
-      type: Operators.includes(val) ? 'ope' : 'com',
-      val
-    })
+    resArr.push(createItem(val, Operators.includes(val) ? 'ope' : 'com'))
     indexArr.push([execRes.index, reg.lastIndex])
   }
   return { resArr, indexArr }
@@ -313,9 +302,19 @@ function getFuncInfo(str) {
     // 执行函数
     const val = funcMap[funcName](params);
     indexArr.push([startIndex, newEndIndex]);
-    resArr.push({ val: val, type: 'str' });
+    resArr.push(createItem(val));
   }
   return { indexArr,  resArr }
+}
+
+/**
+ * 创建列表项
+ * @param type
+ * @param val
+ * @returns {{val, type}}
+ */
+function createItem(val, type = 'str') {
+  return { val, type }
 }
 
 /**
