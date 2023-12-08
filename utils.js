@@ -185,19 +185,20 @@ export function getNotFuncInfo(str) {
 
   // 检验开头是否是变量
   if (str.startsWith('#')) {
-    const varIndex = getVarInfo(str);
-    if (varIndex === length - 1) {
+    const { index } = getVarInfo(str);
+    if (index === -1) {
       arr.push({ type: 'var', val: str });
     } else {
-      const lastStr = str.substring(varIndex, length);
+      const lastStr = str.substring(index, length);
       arr.push(
-        { type: 'var', val: str.substring(0, varIndex) },
+        { type: 'var', val: str.substring(0, index) },
         ...getNotFuncInfo(lastStr)
       )
     }
     return arr;
   }
 
+  // 判断剩下的字符串是否有"比较符"或者"运算符"
   const comReg2 = getCompareReg();
   const opeReg2 = getOperatorReg();
   if (comReg2.test(str) || opeReg2.test(str)) {
@@ -251,22 +252,32 @@ function getOpeInfo(str) {
 /**
  * 获取变量信息
  * @param str
+ * @param isChild 为ture的话，遇到#的次数为偶数就结束
  */
-function getVarInfo(str) {
+function getVarInfo(str, isChild = false) {
   const key = '#';
   let count = 0;
+  // 变量开始的下标
+  let startIndex = -1;
+  // 变量结束的下标
   let index = -1;
   for (let i = 0; i < str.length; i++) {
     const s = str[i];
     if (s === key) {
-      count++;
-    } else if ([...Operators].includes(s)) {
-      if (count % 2 === 0) {
-        index = i;
-        break;
+      if (startIndex === -1) {
+        startIndex = i;
       }
-    } else if (
-      ComparisonOperators.map(str => str.substring(0, 1)).includes(s)
+      count++;
+      if (isChild === true) {
+        if (count % 2 === 0) {
+          index = i;
+          break;
+        }
+      }
+    } else if ( // 如果遇到运算符或者操作符，就判断count是否是偶数，偶数表示变量结束
+      [...Operators].includes(s)
+      // 这里将类似 "<=" 切成 '<' 对比，因为只能对比一个字符
+      || ComparisonOperators.map(str => str.substring(0, 1)).includes(s)
     ) {
       if (count % 2 === 0) {
         index = i;
@@ -274,7 +285,7 @@ function getVarInfo(str) {
       }
     }
   }
-  return index === -1 ? str.length - 1 : index;
+  return { index, startIndex };
 }
 
 /**
@@ -299,7 +310,6 @@ function getFuncInfo(str) {
     const newEndIndex = endIndex + reg.lastIndex + 1;
     const params = getParamsByStr(str.substring(reg.lastIndex + 1, newEndIndex - 1));
     prevLastIndex = newEndIndex;
-    // reg.lastIndex = execRes.index;
     // 执行函数
     const val = funcMap[funcName](params);
     indexArr.push([startIndex, newEndIndex]);
